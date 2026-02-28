@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { 
   Play, RotateCcw, Trash2, ChevronLeft, Trophy, 
@@ -69,9 +69,15 @@ function App() {
   
   // 重复积木编辑相关状态
   const [editingRepeatId, setEditingRepeatId] = useState<string | null>(null)
+  const editingRepeatIdRef = useRef<string | null>(null)
   const [showRepeatDialog, setShowRepeatDialog] = useState(false)
   const [repeatCount, setRepeatCount] = useState(3)
   const [editingRepeatForCount, setEditingRepeatForCount] = useState<string | null>(null)
+
+  // 同步 ref 和 state
+  useEffect(() => {
+    editingRepeatIdRef.current = editingRepeatId
+  }, [editingRepeatId])
 
   // 初始化
   useEffect(() => {
@@ -219,30 +225,34 @@ function App() {
   const addCommand = (type: Command['type']) => {
     if (!currentLevel) return
     
-    const totalBlocks = countTotalBlocks(commands)
-    if (totalBlocks >= currentLevel.max_blocks) {
-      setErrorMsg(`最多只能使用${currentLevel.max_blocks}个积木哦！`)
-      setTimeout(() => setErrorMsg(''), 2000)
-      return
-    }
-
-    // 如果正在编辑重复积木，且点击的不是重复指令，则添加到其中
-    if (editingRepeatId && type !== 'repeat') {
-      const newCommands = addCommandToRepeat(commands, editingRepeatId, type)
-      setCommands(newCommands)
-      updatePythonCode(newCommands)
-      return
-    }
-
-    const newCommand: Command = {
-      id: Date.now().toString(),
-      type,
-      ...(type === 'repeat' ? { count: 3, commands: [] } : {})
-    }
+    // 使用 ref 获取最新的 editingRepeatId，避免闭包问题
+    const currentEditingRepeatId = editingRepeatIdRef.current
     
-    const updatedCommands = [...commands, newCommand]
-    setCommands(updatedCommands)
-    updatePythonCode(updatedCommands)
+    setCommands(prevCommands => {
+      const totalBlocks = countTotalBlocks(prevCommands)
+      if (totalBlocks >= currentLevel.max_blocks) {
+        setErrorMsg(`最多只能使用${currentLevel.max_blocks}个积木哦！`)
+        setTimeout(() => setErrorMsg(''), 2000)
+        return prevCommands
+      }
+
+      // 如果正在编辑重复积木，且点击的不是重复指令，则添加到其中
+      if (currentEditingRepeatId && type !== 'repeat') {
+        const newCommands = addCommandToRepeat(prevCommands, currentEditingRepeatId, type)
+        updatePythonCode(newCommands)
+        return newCommands
+      }
+
+      const newCommand: Command = {
+        id: Date.now().toString(),
+        type,
+        ...(type === 'repeat' ? { count: 3, commands: [] } : {})
+      }
+      
+      const updatedCommands = [...prevCommands, newCommand]
+      updatePythonCode(updatedCommands)
+      return updatedCommands
+    })
     
     // 不再自动进入编辑模式，让用户手动点击重复积木来编辑
   }
