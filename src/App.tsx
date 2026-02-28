@@ -226,7 +226,7 @@ function App() {
       return
     }
 
-    // 如果正在编辑重复积木，则添加到其中
+    // 如果正在编辑重复积木，且点击的不是重复指令，则添加到其中
     if (editingRepeatId && type !== 'repeat') {
       const newCommands = addCommandToRepeat(commands, editingRepeatId, type)
       setCommands(newCommands)
@@ -244,10 +244,7 @@ function App() {
     setCommands(updatedCommands)
     updatePythonCode(updatedCommands)
     
-    // 如果是重复积木，自动进入编辑模式
-    if (type === 'repeat') {
-      setEditingRepeatId(newCommand.id)
-    }
+    // 不再自动进入编辑模式，让用户手动点击重复积木来编辑
   }
 
   // 向重复积木中添加指令
@@ -804,7 +801,7 @@ function App() {
             {cmd.type === 'repeat' ? (
               // 重复积木
               <div 
-                className={`block block-repeat ${isEditingThisRepeat ? 'ring-2 ring-white' : ''}`}
+                className={`block block-repeat ${isEditingThisRepeat ? 'ring-2 ring-white bg-purple-600' : ''}`}
                 onClick={() => {
                   if (!isExecuting) {
                     setEditingRepeatId(isEditingThisRepeat ? null : cmd.id)
@@ -855,7 +852,7 @@ function App() {
                     </div>
                   ) : (
                     <span className="text-xs opacity-70">
-                      {isEditingThisRepeat ? '👆 点击上方积木添加到这里' : '点击编辑'}
+                      {isEditingThisRepeat ? '👆 点击上方指令添加到这里' : '点击此积木编辑内容'}
                     </span>
                   )}
                 </div>
@@ -906,12 +903,12 @@ function App() {
           {/* 编辑模式提示 */}
           {editingRepeatId && (
             <div className="bg-purple-100 border-l-4 border-purple-500 text-purple-700 p-3 rounded-r-lg mb-4 text-sm flex items-center justify-between">
-              <span>📝 正在编辑重复积木，点击上方指令添加进去</span>
+              <span>📝 正在编辑重复积木（紫色高亮），点击上方指令添加进去</span>
               <button 
-                className="text-purple-600 underline"
+                className="px-3 py-1 bg-purple-600 text-white rounded-full text-xs font-medium"
                 onClick={() => setEditingRepeatId(null)}
               >
-                完成
+                完成编辑
               </button>
             </div>
           )}
@@ -937,7 +934,7 @@ function App() {
           {/* 指令积木区 */}
           <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
             <h3 className="font-bold text-gray-800 mb-3 text-sm">
-              {editingRepeatId ? '👇 点击指令添加到重复积木中' : '指令积木'}
+              {editingRepeatId ? '👇 点击指令添加到「重复积木」中' : '指令积木'}
             </h3>
             <div className="flex flex-wrap gap-2">
               <button className="block block-forward" onClick={() => addCommand('forward')} disabled={isExecuting}>
@@ -960,7 +957,10 @@ function App() {
           {/* 程序区 */}
           <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-bold text-gray-800 text-sm">我的程序</h3>
+              <h3 className="font-bold text-gray-800 text-sm">
+                我的程序
+                {editingRepeatId && <span className="ml-2 text-xs font-normal text-purple-600">（点击紫色积木继续编辑）</span>}
+              </h3>
               {commands.length > 0 && (
                 <button className="text-red-500 text-xs flex items-center" onClick={resetLevel}>
                   <Trash2 className="w-3 h-3 mr-1" />清空
