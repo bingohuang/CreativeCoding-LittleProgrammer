@@ -1,6 +1,38 @@
 # 项目修复总结
 
-## 📅 时间：2026-02-28
+## 📅 最新更新：2026-02-28
+
+---
+
+## ✅ 5. 打包优化 - 支持本地直接运行
+
+### 问题
+直接使用 `file://` 协议打开 `index.html` 无法运行（ES 模块跨域限制）。
+
+### 解决方案
+- **单文件打包**：使用 `vite-plugin-singlefile` 将 JS/CSS 全部内联到 HTML
+- **一键启动脚本**：提供各平台的启动脚本
+
+### 文件结构
+```
+dist/
+├── index.html              # 单文件应用（387KB，包含所有资源）
+├── start-server.py         # Python 启动脚本
+├── start-server.bat        # Windows 双击启动
+├── start-server.command    # macOS 双击启动
+└── 使用说明.txt            # 详细使用指南
+```
+
+### 使用方式
+1. **Windows**：双击 `start-server.bat`
+2. **macOS**：双击 `start-server.command`（首次需在右键菜单选择"打开"）
+3. **命令行**：`python start-server.py`
+
+自动打开浏览器，访问 `http://localhost:8080`
+
+---
+
+## 📅 历史修复：2026-02-28
 
 ---
 
