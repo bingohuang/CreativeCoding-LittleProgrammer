@@ -19,8 +19,8 @@
 
 方式二：命令行
   cd 到本目录，然后运行:
-  python -m http.server 8080
-  浏览器访问: http://localhost:8080
+  python -m http.server 2026
+  浏览器访问: http://localhost:2026
 
 方式三：VS Code
   安装 Live Server 插件，右键 index.html → Open with Live Server

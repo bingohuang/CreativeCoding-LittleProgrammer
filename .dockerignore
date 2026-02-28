@@ -1,0 +1,28 @@
+# 构建时忽略的文件
+node_modules
+.git
+.gitignore
+README.md
+CHANGELOG.md
+.env
+.env.local
+
+# 开发文件
+src
+public
+tsconfig*.json
+vite.config.ts
+tailwind.config.js
+postcss.config.js
+components.json
+eslint.config.js
+
+# 日志
+*.log
+server.log
+
+# 压缩包
+*.zip
+
+# macOS
+.DS_Store

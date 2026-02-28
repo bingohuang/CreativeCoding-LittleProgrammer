@@ -9,7 +9,7 @@ import socketserver
 import webbrowser
 import os
 
-PORT = 8080
+PORT = 2026
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -38,6 +38,7 @@ if __name__ == "__main__":
     print(f"\n启动本地服务器中...")
     print(f"端口: {port}")
     print(f"\n请访问: http://localhost:{port}")
+    print(f"       http://127.0.0.1:{port}")
     print("\n按 Ctrl+C 停止服务器")
     print("=" * 50)
     
