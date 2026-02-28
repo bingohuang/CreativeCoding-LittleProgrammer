@@ -79,12 +79,50 @@ function App() {
     editingRepeatIdRef.current = editingRepeatId
   }, [editingRepeatId])
 
+  // 从 sessionStorage 加载进度数据
+  const loadProgressFromSession = () => {
+    try {
+      const savedCompletedLevels = sessionStorage.getItem('completedLevels')
+      const savedAchievements = sessionStorage.getItem('unlockedAchievements')
+      
+      if (savedCompletedLevels) {
+        setCompletedLevels(JSON.parse(savedCompletedLevels))
+      }
+      if (savedAchievements) {
+        setUnlockedAchievements(JSON.parse(savedAchievements))
+      }
+      
+      return !!(savedCompletedLevels || savedAchievements)
+    } catch (error) {
+      console.error('从 sessionStorage 加载数据失败:', error)
+      return false
+    }
+  }
+
+  // 保存进度数据到 sessionStorage
+  const saveProgressToSession = (levels: number[], achievements: string[]) => {
+    try {
+      sessionStorage.setItem('completedLevels', JSON.stringify(levels))
+      sessionStorage.setItem('unlockedAchievements', JSON.stringify(achievements))
+    } catch (error) {
+      console.error('保存到 sessionStorage 失败:', error)
+    }
+  }
+
+  // 监听进度变化，自动保存到 sessionStorage
+  useEffect(() => {
+    saveProgressToSession(completedLevels, unlockedAchievements)
+  }, [completedLevels, unlockedAchievements])
+
   // 初始化
   useEffect(() => {
-    fetchData()
+    // 先从 sessionStorage 加载数据
+    const hasSessionData = loadProgressFromSession()
+    // 然后尝试从服务器获取（如果 sessionStorage 没有数据）
+    fetchData(hasSessionData)
   }, [])
 
-  const fetchData = async () => {
+  const fetchData = async (skipProgressState: boolean = false) => {
     try {
       setIsLoading(true)
       const [levelsRes, achievementsRes, progressRes] = await Promise.all([
@@ -99,7 +137,8 @@ function App() {
 
       if (levelsData.success) setLevels(levelsData.data)
       if (achievementsData.success) setAchievements(achievementsData.data)
-      if (progressData.success) {
+      // 如果没有 sessionStorage 数据，才从服务器加载进度
+      if (!skipProgressState && progressData.success) {
         setCompletedLevels(progressData.data.completed_levels || [])
         setUnlockedAchievements(progressData.data.achievements || [])
       }
@@ -576,8 +615,18 @@ function App() {
         }
       }
     } catch (error) {
+      // API 失败时，本地更新进度（useEffect 会自动保存到 sessionStorage）
       if (!completedLevels.includes(currentLevel.id)) {
-        setCompletedLevels([...completedLevels, currentLevel.id])
+        const newCompletedLevels = [...completedLevels, currentLevel.id]
+        setCompletedLevels(newCompletedLevels)
+        // 模拟解锁第一个成就
+        if (newCompletedLevels.length === 1 && unlockedAchievements.length === 0) {
+          const firstAch = achievements.find(a => a.id === 'first_step')
+          if (firstAch) {
+            setShowAchievement(firstAch)
+            setUnlockedAchievements(['first_step'])
+          }
+        }
       }
     }
   }
