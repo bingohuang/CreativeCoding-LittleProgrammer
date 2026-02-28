@@ -182,34 +182,53 @@ function App() {
     },
     {
       id: 5,
-      name: '复杂迷宫',
-      description: '综合运用各种指令！',
-      grid_size: 8,
-      start: { x: 0, y: 7, direction: 'right' },
-      target: { x: 7, y: 0 },
+      name: '迷宫突围',
+      description: '复杂的9x9迷宫，需要精确规划路线！',
+      grid_size: 9,
+      start: { x: 0, y: 8, direction: 'right' },
+      target: { x: 8, y: 0 },
       obstacles: [
-        { x: 2, y: 7 }, { x: 2, y: 6 }, { x: 2, y: 5 },
-        { x: 5, y: 3 }, { x: 5, y: 2 }, { x: 5, y: 1 },
-        { x: 6, y: 4 }
+        // 左侧墙壁
+        { x: 2, y: 8 }, { x: 2, y: 7 }, { x: 2, y: 6 }, { x: 2, y: 5 },
+        // 中间障碍区
+        { x: 4, y: 8 }, { x: 4, y: 7 }, { x: 4, y: 6 }, { x: 4, y: 4 }, { x: 4, y: 3 },
+        // 右侧复杂障碍
+        { x: 6, y: 7 }, { x: 6, y: 6 }, { x: 6, y: 5 }, { x: 6, y: 4 }, { x: 6, y: 2 }, { x: 6, y: 1 },
+        // 顶部障碍
+        { x: 1, y: 2 }, { x: 3, y: 1 }, { x: 5, y: 0 }, { x: 7, y: 3 },
+        // 额外障碍点
+        { x: 3, y: 5 }, { x: 5, y: 3 }, { x: 7, y: 5 }, { x: 1, y: 4 }
       ],
-      max_blocks: 20,
-      hint: '先向上，再向右，再向下',
+      max_blocks: 16,
+      hint: '需要绕过多重障碍，善用循环减少代码量',
       difficulty: '困难'
     },
     {
       id: 6,
-      name: '算法挑战',
-      description: '找出最短路径！',
-      grid_size: 8,
-      start: { x: 0, y: 0, direction: 'down' },
-      target: { x: 7, y: 7 },
+      name: '终极挑战',
+      description: '10x10超难迷宫，极限积木限制！',
+      grid_size: 10,
+      start: { x: 0, y: 9, direction: 'right' },
+      target: { x: 9, y: 0 },
       obstacles: [
-        { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 },
-        { x: 4, y: 4 }, { x: 5, y: 5 }, { x: 6, y: 6 }
+        // 外围迷宫墙
+        { x: 1, y: 9 }, { x: 3, y: 9 }, { x: 5, y: 9 }, { x: 7, y: 9 },
+        { x: 0, y: 7 }, { x: 2, y: 7 }, { x: 4, y: 7 }, { x: 6, y: 7 }, { x: 8, y: 7 },
+        // 中层复杂障碍
+        { x: 1, y: 6 }, { x: 3, y: 6 }, { x: 5, y: 6 }, { x: 7, y: 6 }, { x: 9, y: 6 },
+        { x: 2, y: 5 }, { x: 4, y: 5 }, { x: 6, y: 5 }, { x: 8, y: 5 },
+        // 深层障碍
+        { x: 1, y: 4 }, { x: 3, y: 4 }, { x: 5, y: 4 }, { x: 7, y: 4 }, { x: 9, y: 4 },
+        { x: 0, y: 3 }, { x: 2, y: 3 }, { x: 4, y: 3 }, { x: 6, y: 3 }, { x: 8, y: 3 },
+        // 接近终点区域
+        { x: 1, y: 2 }, { x: 3, y: 2 }, { x: 5, y: 2 }, { x: 7, y: 2 },
+        { x: 0, y: 1 }, { x: 2, y: 1 }, { x: 4, y: 1 }, { x: 6, y: 1 }, { x: 8, y: 1 },
+        // 终点周围障碍
+        { x: 8, y: 0 }, { x: 7, y: 0 }, { x: 9, y: 2 }
       ],
-      max_blocks: 25,
-      hint: '走另一条对角线路径',
-      difficulty: '困难'
+      max_blocks: 12,
+      hint: '积木数量极少，必须巧妙使用嵌套循环！',
+      difficulty: '极难'
     }
   ]
 
