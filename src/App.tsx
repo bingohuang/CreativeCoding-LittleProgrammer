@@ -45,8 +45,7 @@ interface Achievement {
   icon: string
 }
 
-// API 基础URL
-const API_BASE = ''
+// 所有数据现在都存在 localStorage 中，不再调用 API
 
 function App() {
   // 状态
@@ -60,9 +59,25 @@ function App() {
   const [path, setPath] = useState<Position[]>([])
   const [showSuccess, setShowSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
-  const [completedLevels, setCompletedLevels] = useState<number[]>([])
+  // 从 localStorage 初始化
+  const [completedLevels, setCompletedLevels] = useState<number[]>(() => {
+    try {
+      const saved = localStorage.getItem('completedLevels')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
   const [achievements, setAchievements] = useState<Achievement[]>([])
-  const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([])
+  // 从 localStorage 初始化
+  const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('unlockedAchievements')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
   const [showAchievement, setShowAchievement] = useState<Achievement | null>(null)
   const [showHint, setShowHint] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -79,76 +94,42 @@ function App() {
     editingRepeatIdRef.current = editingRepeatId
   }, [editingRepeatId])
 
-  // 从 sessionStorage 加载进度数据
-  const loadProgressFromSession = () => {
-    try {
-      const savedCompletedLevels = sessionStorage.getItem('completedLevels')
-      const savedAchievements = sessionStorage.getItem('unlockedAchievements')
-      
-      if (savedCompletedLevels) {
-        setCompletedLevels(JSON.parse(savedCompletedLevels))
-      }
-      if (savedAchievements) {
-        setUnlockedAchievements(JSON.parse(savedAchievements))
-      }
-      
-      return !!(savedCompletedLevels || savedAchievements)
-    } catch (error) {
-      console.error('从 sessionStorage 加载数据失败:', error)
-      return false
-    }
-  }
-
-  // 保存进度数据到 sessionStorage
-  const saveProgressToSession = (levels: number[], achievements: string[]) => {
-    try {
-      sessionStorage.setItem('completedLevels', JSON.stringify(levels))
-      sessionStorage.setItem('unlockedAchievements', JSON.stringify(achievements))
-    } catch (error) {
-      console.error('保存到 sessionStorage 失败:', error)
-    }
-  }
-
-  // 监听进度变化，自动保存到 sessionStorage
+  // 监听进度变化，自动保存到 localStorage
   useEffect(() => {
-    saveProgressToSession(completedLevels, unlockedAchievements)
-  }, [completedLevels, unlockedAchievements])
+    try {
+      localStorage.setItem('completedLevels', JSON.stringify(completedLevels))
+    } catch (error) {
+      console.error('保存 completedLevels 失败:', error)
+    }
+  }, [completedLevels])
 
-  // 初始化
   useEffect(() => {
-    // 先从 sessionStorage 加载数据
-    const hasSessionData = loadProgressFromSession()
-    // 然后尝试从服务器获取（如果 sessionStorage 没有数据）
-    fetchData(hasSessionData)
+    try {
+      localStorage.setItem('unlockedAchievements', JSON.stringify(unlockedAchievements))
+    } catch (error) {
+      console.error('保存 unlockedAchievements 失败:', error)
+    }
+  }, [unlockedAchievements])
+
+  // 初始化 - 获取关卡和成就数据
+  useEffect(() => {
+    fetchData()
   }, [])
 
-  const fetchData = async (skipProgressState: boolean = false) => {
-    try {
-      setIsLoading(true)
-      const [levelsRes, achievementsRes, progressRes] = await Promise.all([
-        fetch(`${API_BASE}/api/levels`),
-        fetch(`${API_BASE}/api/achievements`),
-        fetch(`${API_BASE}/api/progress?user_id=default`)
-      ])
-
-      const levelsData = await levelsRes.json()
-      const achievementsData = await achievementsRes.json()
-      const progressData = await progressRes.json()
-
-      if (levelsData.success) setLevels(levelsData.data)
-      if (achievementsData.success) setAchievements(achievementsData.data)
-      // 如果没有 sessionStorage 数据，才从服务器加载进度
-      if (!skipProgressState && progressData.success) {
-        setCompletedLevels(progressData.data.completed_levels || [])
-        setUnlockedAchievements(progressData.data.achievements || [])
-      }
-    } catch (error) {
-      console.error('获取数据失败:', error)
-      setLevels(getDefaultLevels())
-    } finally {
-      setIsLoading(false)
-    }
+  const fetchData = async () => {
+    // 使用本地数据，不调用 API
+    setLevels(getDefaultLevels())
+    setAchievements(getDefaultAchievements())
+    setIsLoading(false)
   }
+
+  const getDefaultAchievements = (): Achievement[] => [
+    { id: 'first_step', name: '第一步', description: '完成第1关', icon: '🌟' },
+    { id: 'loop_master', name: '循环大师', description: '使用循环完成关卡', icon: '🔄' },
+    { id: 'code_poet', name: '代码诗人', description: '用最少积木完成关卡', icon: '📝' },
+    { id: 'speed_runner', name: '速通者', description: '快速完成所有关卡', icon: '⚡' },
+    { id: 'perfect_clear', name: '完美通关', description: '完成所有关卡', icon: '🏆' }
+  ]
 
   const getDefaultLevels = (): Level[] => [
     {
@@ -412,19 +393,8 @@ function App() {
 
   // 更新Python代码
   const updatePythonCode = async (cmds: Command[]) => {
-    try {
-      const res = await fetch(`${API_BASE}/api/python-code`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ commands: cmds })
-      })
-      const data = await res.json()
-      if (data.success) {
-        setPythonCode(data.code)
-      }
-    } catch (error) {
-      generateLocalPythonCode(cmds)
-    }
+    // 使用本地生成，不调用 API
+    generateLocalPythonCode(cmds)
   }
 
   const generateLocalPythonCode = (cmds: Command[]) => {
@@ -471,40 +441,8 @@ function App() {
     setPath([{ ...currentLevel.start }])
     setEditingRepeatId(null)
 
-    try {
-      const res = await fetch(`${API_BASE}/api/execute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          commands, 
-          level_id: currentLevel.id 
-        })
-      })
-      const data = await res.json()
-      
-      if (data.success) {
-        const result = data.data
-        
-        for (let i = 0; i < result.path.length; i++) {
-          setCharacterPos(result.path[i])
-          setPath(prev => [...prev.slice(0, i + 1), result.path[i]])
-          await new Promise(r => setTimeout(r, 300))
-        }
-
-        if (result.reached_target) {
-          setShowSuccess(true)
-          await saveProgress()
-        } else {
-          setErrorMsg(result.message)
-        }
-      } else {
-        setErrorMsg(data.error || '执行出错')
-      }
-    } catch (error) {
-      executeLocally()
-    } finally {
-      setIsExecuting(false)
-    }
+    // 直接使用本地执行
+    await executeLocally()
   }
 
   // 本地执行（备用）
@@ -587,45 +525,20 @@ function App() {
     setIsExecuting(false)
   }
 
-  // 保存进度
+  // 保存进度（本地版本，不调用 API）
   const saveProgress = async () => {
     if (!currentLevel) return
     
-    try {
-      const res = await fetch(`${API_BASE}/api/progress`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: 'default',
-          level_id: currentLevel.id,
-          blocks_used: commands.length,
-          time: Date.now()
-        })
-      })
-      const data = await res.json()
-      
-      if (data.success) {
-        setCompletedLevels(data.data.completed_levels || [])
-        if (data.new_achievements?.length > 0) {
-          const newAch = achievements.find(a => a.id === data.new_achievements[0])
-          if (newAch) {
-            setShowAchievement(newAch)
-            setUnlockedAchievements(data.data.achievements || [])
-          }
-        }
-      }
-    } catch (error) {
-      // API 失败时，本地更新进度（useEffect 会自动保存到 sessionStorage）
-      if (!completedLevels.includes(currentLevel.id)) {
-        const newCompletedLevels = [...completedLevels, currentLevel.id]
-        setCompletedLevels(newCompletedLevels)
-        // 模拟解锁第一个成就
-        if (newCompletedLevels.length === 1 && unlockedAchievements.length === 0) {
-          const firstAch = achievements.find(a => a.id === 'first_step')
-          if (firstAch) {
-            setShowAchievement(firstAch)
-            setUnlockedAchievements(['first_step'])
-          }
+    // 本地更新进度（useEffect 会自动保存到 localStorage）
+    if (!completedLevels.includes(currentLevel.id)) {
+      const newCompletedLevels = [...completedLevels, currentLevel.id]
+      setCompletedLevels(newCompletedLevels)
+      // 模拟解锁第一个成就
+      if (newCompletedLevels.length === 1 && unlockedAchievements.length === 0) {
+        const firstAch = achievements.find(a => a.id === 'first_step')
+        if (firstAch) {
+          setShowAchievement(firstAch)
+          setUnlockedAchievements(['first_step'])
         }
       }
     }
