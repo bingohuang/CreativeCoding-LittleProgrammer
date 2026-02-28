@@ -4,6 +4,32 @@
 
 ---
 
+## ✅ 7. Docker Hub 发布
+
+### 镜像地址
+- **Docker Hub**: https://hub.docker.com/r/xbingo/little-programmer
+- **拉取命令**: `docker pull xbingo/little-programmer:latest`
+
+### 快速启动
+```bash
+# 拉取镜像
+docker pull xbingo/little-programmer:latest
+
+# 运行容器
+docker run -d --name little-programmer -p 2026:2026 xbingo/little-programmer:latest
+
+# 浏览器访问
+http://localhost:2026
+```
+
+### 镜像标签
+| 标签 | 说明 |
+|-----|------|
+| `latest` | 最新版本 |
+| `1.0.0` | 稳定版本 |
+
+---
+
 ## ✅ 6. Docker 容器化部署
 
 ### 新增文件
