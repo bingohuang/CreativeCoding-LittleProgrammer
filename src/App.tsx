@@ -888,6 +888,15 @@ function App() {
           {showHint && <div className="hint-box mb-4"><p className="text-sm">💡 提示：{currentLevel.hint}</p></div>}
           {errorMsg && <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-r-lg mb-4 text-sm">{errorMsg}</div>}
 
+          {/* 运行按钮 - 移到游戏网格上方 */}
+          <Button
+            className="w-full btn-primary h-12 text-base mb-4"
+            onClick={executeProgram}
+            disabled={isExecuting || commands.length === 0}
+          >
+            {isExecuting ? <><RefreshCw className="w-5 h-5 mr-2 animate-spin" />运行中...</> : <><Play className="w-5 h-5 mr-2" />▶ 运行程序</>}
+          </Button>
+
           {/* 游戏网格 */}
           <div className="game-grid mb-4" style={{ gridTemplateColumns: `repeat(${currentLevel.grid_size}, 1fr)` }}>
             {gridCells}
@@ -959,15 +968,6 @@ function App() {
               <pre className="python-code text-xs">{pythonCode}</pre>
             </ScrollArea>
           </div>
-
-          {/* 运行按钮 */}
-          <Button
-            className="w-full btn-primary h-14 text-lg mb-4"
-            onClick={executeProgram}
-            disabled={isExecuting || commands.length === 0}
-          >
-            {isExecuting ? <><RefreshCw className="w-5 h-5 mr-2 animate-spin" />运行中...</> : <><Play className="w-5 h-5 mr-2" />运行程序</>}
-          </Button>
         </div>
 
         {/* 成功弹窗 */}
