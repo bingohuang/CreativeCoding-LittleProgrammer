@@ -4,6 +4,32 @@
 
 ---
 
+## ✅ 6. Docker 容器化部署
+
+### 新增文件
+- **Dockerfile** - 使用 Nginx Alpine 作为基础镜像
+- **.dockerignore** - 排除不必要的文件
+
+### 使用方式
+```bash
+# 构建镜像
+docker build -t little-programmer:1.0.0 .
+
+# 运行容器
+docker run -d --name little-programmer -p 2026:2026 little-programmer:1.0.0
+
+# 浏览器访问
+http://localhost:2026
+```
+
+### 镜像信息
+- 基础镜像：`nginx:alpine`
+- 端口：`2026`
+- 健康检查：已启用
+- 镜像大小：约 25MB
+
+---
+
 ## ✅ 5. 打包优化 - 支持本地直接运行
 
 ### 问题
