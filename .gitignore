@@ -1,1 +1,76 @@
+# Dependencies
 node_modules
+.pnp
+.pnp.js
+
+# Build info
+*.tsbuildinfo
+
+# Archives (zip, tar, etc.)
+*.zip
+*.tar.gz
+*.tar
+*.rar
+*.7z
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+server.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE - VSCode
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# IDE - JetBrains
+.idea
+*.iml
+
+# IDE - Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# IDE - Vim/Neovim
+*.swp
+*.swo
+*~
+.nvimrc
+
+# Testing
+coverage
+*.lcov
+.nyc_output
+
+# Misc
+.cache
+.temp
+.tmp
+.eslintcache
+.stylelintcache
+
+# Python (if using server.py)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
