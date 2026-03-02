@@ -33,8 +33,20 @@ fi
 
 # 询问是否删除容器
 echo ""
-read -p "是否删除容器? (y/n): " answer
-if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+# 检查是否是交互式终端
+if [ -t 0 ]; then
+    read -p "是否删除容器? (y/n): " answer
+    if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+        REMOVE_CONTAINER=true
+    else
+        REMOVE_CONTAINER=false
+    fi
+else
+    echo "ℹ️  非交互式终端，自动删除容器..."
+    REMOVE_CONTAINER=true
+fi
+
+if [ "$REMOVE_CONTAINER" = "true" ]; then
     echo "🗑️  删除容器..."
     docker rm "${CONTAINER_NAME}"
     echo "✅ 容器已删除"

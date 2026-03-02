@@ -58,8 +58,21 @@ fi
 if ! docker images | grep -q "${IMAGE_NAME}.*${VERSION}"; then
     echo "⚠️  本地镜像 ${FULL_IMAGE_NAME} 不存在"
     echo ""
-    read -p "是否从 Docker Hub 拉取镜像? (y/n): " answer
-    if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+    
+    # 检查是否是交互式终端
+    if [ -t 0 ]; then
+        read -p "是否从 Docker Hub 拉取镜像? (y/n): " answer
+        if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+            PULL_IMAGE=true
+        else
+            PULL_IMAGE=false
+        fi
+    else
+        echo "ℹ️  非交互式终端，自动从 Docker Hub 拉取镜像..."
+        PULL_IMAGE=true
+    fi
+    
+    if [ "$PULL_IMAGE" = "true" ]; then
         echo ""
         echo "📥 从 Docker Hub 拉取镜像..."
         echo "   Docker 会自动选择与当前系统匹配的架构 (amd64/arm64)"
@@ -68,8 +81,20 @@ if ! docker images | grep -q "${IMAGE_NAME}.*${VERSION}"; then
         if [ $? -ne 0 ]; then
             echo "❌ 拉取镜像失败"
             echo ""
-            read -p "是否尝试构建本地镜像? (y/n): " build_answer
-            if [ "$build_answer" = "y" ] || [ "$build_answer" = "Y" ]; then
+            # 检查是否是交互式终端
+            if [ -t 0 ]; then
+                read -p "是否尝试构建本地镜像? (y/n): " build_answer
+                if [ "$build_answer" = "y" ] || [ "$build_answer" = "Y" ]; then
+                    BUILD_LOCAL=true
+                else
+                    BUILD_LOCAL=false
+                fi
+            else
+                echo "ℹ️  非交互式终端，自动尝试构建本地镜像..."
+                BUILD_LOCAL=true
+            fi
+            
+            if [ "$BUILD_LOCAL" = "true" ]; then
                 "${SCRIPT_DIR}/build.sh"
             else
                 exit 1
