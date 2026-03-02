@@ -1,6 +1,47 @@
 # 项目修复总结
 
-## 📅 最新更新：2026-02-28
+## 📅 最新更新：2026-03-02
+
+---
+
+## ✅ 8. 添加 Docker 部署脚本和版本管理
+
+### 新增文件
+- **VERSION** - 版本号管理文件（当前版本: 1.0.3）
+- **scripts/docker/build.sh** - Docker 镜像构建脚本
+- **scripts/docker/push.sh** - Docker 镜像推送脚本
+- **scripts/docker/start.sh** - Docker 容器启动脚本
+- **scripts/docker/stop.sh** - Docker 容器停止脚本
+- **scripts/docker/logs.sh** - Docker 容器日志查看脚本
+- **scripts/docker/README.md** - 脚本使用说明
+
+### 镜像信息
+- **镜像名**: `xbingo/little-programmer`
+- **版本**: `1.0.3`
+- **容器名**: `little-programmer`
+- **端口**: `2026`
+
+### 使用方式
+```bash
+# 构建镜像
+./scripts/docker/build.sh
+
+# 启动容器
+./scripts/docker/start.sh
+
+# 查看日志
+./scripts/docker/logs.sh -f
+
+# 停止容器
+./scripts/docker/stop.sh
+
+# 推送镜像
+./scripts/docker/push.sh
+```
+
+---
+
+## 📅 历史更新：2026-02-28
 
 ---
 
