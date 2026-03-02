@@ -2,6 +2,7 @@
 
 # 小小程序员逻辑思维训练器 - Docker 镜像推送脚本
 # 推送镜像到 Docker Hub
+# ⚠️ 注意：对于多架构镜像，请使用 build-and-push.sh 脚本
 
 set -e
 
@@ -30,6 +31,17 @@ echo "📦 项目: 小小程序员逻辑思维训练器"
 echo "🏷️  版本: ${VERSION}"
 echo "🖼️  镜像: ${FULL_IMAGE_NAME}"
 echo "=========================================="
+
+# 提示用户使用 build-and-push.sh 构建多架构镜像
+echo ""
+echo "💡 提示：要构建并推送多架构镜像 (amd64 + arm64)，请使用:"
+echo "   ./scripts/docker/build-and-push.sh"
+echo ""
+read -p "是否继续推送当前本地镜像? (y/n): " continue_push
+if [ "$continue_push" != "y" ] && [ "$continue_push" != "Y" ]; then
+    echo "❌ 取消推送"
+    exit 0
+fi
 
 # 检查镜像是否存在
 echo ""
@@ -75,9 +87,9 @@ if [ $? -eq 0 ]; then
     echo "📋 Docker Hub 地址:"
     echo "   https://hub.docker.com/r/${IMAGE_NAME}"
     echo ""
-    echo "🚀 拉取镜像:"
-    echo "   docker pull ${FULL_IMAGE_NAME}"
-    echo "   docker pull ${LATEST_IMAGE_NAME}"
+    echo "⚠️  注意：当前推送的是单架构镜像"
+    echo "   要推送多架构镜像 (amd64 + arm64)，请使用:"
+    echo "   ./scripts/docker/build-and-push.sh"
 else
     echo ""
     echo "❌ 镜像推送失败"

@@ -4,10 +4,47 @@
 
 ---
 
+## ✅ 9. 支持多架构 Docker 镜像 (amd64 + arm64)
+
+### 新增功能
+- **多架构支持**: 同时支持 `linux/amd64` (x86_64) 和 `linux/arm64` (ARM64/Apple Silicon)
+- **build-and-push.sh**: 新增一键构建并推送多架构镜像脚本
+
+### 更新的脚本
+- **build.sh** - 支持使用 docker buildx 构建多架构镜像
+- **push.sh** - 提示用户使用 build-and-push.sh 进行多架构推送
+- **start.sh** - 自动检测并拉取适合当前系统的架构
+
+### 镜像架构
+| 架构 | 说明 | 适用平台 |
+|-----|------|---------|
+| `linux/amd64` | x86_64 | Intel/AMD 处理器 |
+| `linux/arm64` | ARM64 | Apple Silicon (M1/M2/M3), ARM 服务器 |
+
+### 使用方式
+```bash
+# 构建并推送多架构镜像（推荐）
+./scripts/docker/build-and-push.sh
+
+# 仅构建多架构镜像到本地
+./scripts/docker/build.sh
+
+# 拉取并运行（Docker 自动选择当前架构）
+docker pull xbingo/little-programmer:1.0.4
+./scripts/docker/start.sh
+```
+
+### 技术细节
+- 使用 `docker buildx` 实现跨平台构建
+- 使用 Docker manifest 实现多架构支持
+- Docker 会根据宿主机架构自动选择合适的镜像
+
+---
+
 ## ✅ 8. 添加 Docker 部署脚本和版本管理
 
 ### 新增文件
-- **VERSION** - 版本号管理文件（当前版本: 1.0.3）
+- **VERSION** - 版本号管理文件（当前版本: 1.0.4）
 - **scripts/docker/build.sh** - Docker 镜像构建脚本
 - **scripts/docker/push.sh** - Docker 镜像推送脚本
 - **scripts/docker/start.sh** - Docker 容器启动脚本
@@ -17,27 +54,9 @@
 
 ### 镜像信息
 - **镜像名**: `xbingo/little-programmer`
-- **版本**: `1.0.3`
+- **版本**: `1.0.4`
 - **容器名**: `little-programmer`
 - **端口**: `2026`
-
-### 使用方式
-```bash
-# 构建镜像
-./scripts/docker/build.sh
-
-# 启动容器
-./scripts/docker/start.sh
-
-# 查看日志
-./scripts/docker/logs.sh -f
-
-# 停止容器
-./scripts/docker/stop.sh
-
-# 推送镜像
-./scripts/docker/push.sh
-```
 
 ---
 

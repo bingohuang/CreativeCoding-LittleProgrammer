@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # 小小程序员逻辑思维训练器 - Docker 容器启动脚本
+# 支持多架构镜像 (amd64/arm64)
 
 set -e
 
@@ -59,11 +60,38 @@ if ! docker images | grep -q "${IMAGE_NAME}.*${VERSION}"; then
     echo ""
     read -p "是否从 Docker Hub 拉取镜像? (y/n): " answer
     if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
-        echo "📥 拉取镜像..."
+        echo ""
+        echo "📥 从 Docker Hub 拉取镜像..."
+        echo "   Docker 会自动选择与当前系统匹配的架构 (amd64/arm64)"
         docker pull "${FULL_IMAGE_NAME}"
+        
+        if [ $? -ne 0 ]; then
+            echo "❌ 拉取镜像失败"
+            echo ""
+            read -p "是否尝试构建本地镜像? (y/n): " build_answer
+            if [ "$build_answer" = "y" ] || [ "$build_answer" = "Y" ]; then
+                "${SCRIPT_DIR}/build.sh"
+            else
+                exit 1
+            fi
+        fi
     else
         echo "🔨 尝试构建本地镜像..."
         "${SCRIPT_DIR}/build.sh"
+    fi
+fi
+
+# 显示镜像架构信息
+echo ""
+echo "🔍 镜像信息:"
+docker images --format "table {{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.Size}}" | grep "${IMAGE_NAME}" | grep "${VERSION}" || true
+
+# 尝试获取镜像架构
+IMAGE_INSPECT=$(docker inspect "${FULL_IMAGE_NAME}" 2>/dev/null || echo "")
+if [ -n "$IMAGE_INSPECT" ]; then
+    ARCH=$(echo "$IMAGE_INSPECT" | grep -o '"Architecture": "[^"]*"' | head -1 | cut -d'"' -f4)
+    if [ -n "$ARCH" ]; then
+        echo "   架构: ${ARCH}"
     fi
 fi
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# 小小程序员逻辑思维训练器 - Docker 镜像构建脚本
+# 小小程序员逻辑思维训练器 - Docker 多架构镜像构建并推送脚本
 # 镜像名: xbingo/little-programmer
-# 支持多架构: linux/amd64, linux/arm64
+# 支持架构: linux/amd64 (x86_64), linux/arm64 (ARM64)
 
 set -e
 
@@ -28,7 +28,7 @@ LATEST_IMAGE_NAME="${IMAGE_NAME}:latest"
 PLATFORMS="linux/amd64,linux/arm64"
 
 echo "=========================================="
-echo "🐳 Docker 镜像构建"
+echo "🐳 Docker 多架构镜像构建并推送"
 echo "=========================================="
 echo "📦 项目: 小小程序员逻辑思维训练器"
 echo "🏷️  版本: ${VERSION}"
@@ -56,6 +56,24 @@ if ! docker buildx version > /dev/null 2>&1; then
     exit 1
 fi
 
+# 检查是否已登录 Docker Hub
+echo ""
+echo "🔑 检查 Docker Hub 登录状态..."
+if ! docker info 2>/dev/null | grep -q "Username"; then
+    echo "⚠️  未检测到 Docker Hub 登录状态"
+    echo ""
+    echo "请先登录 Docker Hub:"
+    echo "   docker login"
+    echo ""
+    read -p "是否现在登录? (y/n): " answer
+    if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+        docker login
+    else
+        echo "❌ 取消操作"
+        exit 1
+    fi
+fi
+
 # 检查/创建 buildx builder
 BUILDER_NAME="little-programmer-builder"
 if ! docker buildx ls | grep -q "${BUILDER_NAME}"; then
@@ -67,36 +85,41 @@ fi
 # 使用指定的 builder
 docker buildx use "${BUILDER_NAME}"
 
-# 构建多架构镜像（仅本地，不推送）
+# 构建并推送多架构镜像
 echo ""
-echo "🔨 开始构建多架构 Docker 镜像..."
+echo "🔨 开始构建并推送多架构镜像..."
 echo "   平台: ${PLATFORMS}"
-cd "${PROJECT_ROOT}"
-
-# 先构建加载到本地（仅当前架构）
+echo "   镜像: ${FULL_IMAGE_NAME}"
+echo "   镜像: ${LATEST_IMAGE_NAME}"
 echo ""
-echo "📦 构建当前架构镜像到本地..."
+
+cd "${PROJECT_ROOT}"
 docker buildx build \
     --platform "${PLATFORMS}" \
     --tag "${FULL_IMAGE_NAME}" \
     --tag "${LATEST_IMAGE_NAME}" \
-    --load \
+    --push \
     .
 
 if [ $? -eq 0 ]; then
     echo ""
-    echo "✅ 镜像构建成功！"
+    echo "✅ 多架构镜像构建并推送成功！"
     echo ""
-    echo "📋 镜像信息:"
-    docker images | grep "${IMAGE_NAME}" | grep -E "${VERSION}|latest" || true
+    echo "📋 Docker Hub 地址:"
+    echo "   https://hub.docker.com/r/${IMAGE_NAME}"
     echo ""
-    echo "🚀 构建并推送多架构镜像到 Docker Hub:"
-    echo "   ./scripts/docker/build-and-push.sh"
+    echo "🖥️  支持的架构:"
+    echo "   - linux/amd64 (x86_64)"
+    echo "   - linux/arm64 (ARM64/Apple Silicon)"
+    echo ""
+    echo "🚀 拉取镜像:"
+    echo "   docker pull ${FULL_IMAGE_NAME}"
+    echo "   docker pull ${LATEST_IMAGE_NAME}"
     echo ""
     echo "▶️  启动容器:"
     echo "   ./scripts/docker/start.sh"
 else
     echo ""
-    echo "❌ 镜像构建失败"
+    echo "❌ 镜像构建或推送失败"
     exit 1
 fi
