@@ -74,3 +74,6 @@ __pycache__/
 .Python
 venv/
 .venv/
+
+# pdf
+*.pdf
